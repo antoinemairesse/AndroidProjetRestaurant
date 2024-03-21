@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Include the toolbar layout -->
+        <include layout="@layout/toolbar_layout" />
+
+        <!-- Restaurant details -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Restaurant image -->
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop" />
+
+            <!-- Restaurant name -->
+            <TextView
+                android:id="@+id/textViewRestaurantName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                />
+
+            <!-- Restaurant address -->
+            <TextView
+                android:id="@+id/textViewRestaurantAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp" />
+
+            <!-- Restaurant rating -->
+            <TextView
+                android:id="@+id/textViewRestaurantRating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp" />
+
+            <!-- Restaurant price -->
+            <TextView
+                android:id="@+id/textViewRestaurantPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp" />
+
+
+            <TextView
+                android:id="@+id/textViewRestaurantDescriptionTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Description :"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Restaurant description -->
+            <TextView
+                android:id="@+id/textViewRestaurantDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/buttonAddReview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Add review"
+            />
+
+            <Button
+                android:id="@+id/buttonSeeReview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="See reviews"
+                />
+
+            <TextView
+                android:id="@+id/textViewRestaurantReservationTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Reservation :"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Reservation section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
+
+                <!-- Number of people -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Number of People :"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editTextNumberOfPeople"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:hint="Number of people"
+                        android:inputType="number"
+                        android:maxLength="2" />
+
+                </LinearLayout>
+
+
+                <!-- Reservation date -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="Reservation Date :"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/textViewReservationDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:maxLength="2"
+                        android:layout_marginTop="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_weight="1"
+                        android:inputType="none"
+                        android:focusableInTouchMode="false"
+                        android:padding="8dp"
+                        android:hint="Insert date"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Button to make reservation -->
+            <Button
+                android:id="@+id/buttonMakeReservation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Make Reservation" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
