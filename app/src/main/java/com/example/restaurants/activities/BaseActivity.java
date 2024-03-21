@@ -1,10 +1,12 @@
-package com.example.restaurants;
+package com.example.restaurants.activities;
 
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.example.restaurants.R;
 
 public class BaseActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package com.example.restaurants;
+package com.example.restaurants.activities;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
+import com.example.restaurants.CustomImageOverlay;
+import com.example.restaurants.R;
+import com.example.restaurants.models.Restaurant;
+import com.example.restaurants.utils.FirebaseUtils;
+import com.example.restaurants.utils.ImageUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -21,22 +23,31 @@ import org.osmdroid.views.MapView;
 import java.io.IOException;
 import java.util.List;
 
-
+/**
+ * ReviewMapActivity displays a map with reviews of a selected restaurant.
+ * It fetches restaurant data from Firestore, then retrieves reviews associated with that restaurant,
+ * and displays them as markers on the map along with images.
+ */
 public class ReviewMapActivity extends BaseActivity {
     private MapView mapView;
     private Restaurant restaurant;
     private FirebaseFirestore db;
-    private OnCompleteListener<QuerySnapshot> onRestaurantFetched = taskSnapshot -> {
-        List<DocumentSnapshot> documents = getDocumentsFromTask(taskSnapshot);
+    private final OnCompleteListener<QuerySnapshot> onRestaurantFetched = taskSnapshot -> {
+        List<DocumentSnapshot> documents = FirebaseUtils.getDocumentsFromTask(this, taskSnapshot);
         assert documents != null;
         DocumentSnapshot restaurant = documents.get(0);
         fetchReviews(restaurant);
     };
 
+    /**
+     * Fetches reviews associated with the provided restaurant document.
+     *
+     * @param restaurant DocumentSnapshot containing restaurant data.
+     */
     private void fetchReviews(DocumentSnapshot restaurant) {
 
         OnCompleteListener<QuerySnapshot> onReviewsFetched = task -> {
-            List<DocumentSnapshot> reviews = getDocumentsFromTask(task);
+            List<DocumentSnapshot> reviews = FirebaseUtils.getDocumentsFromTask(this, task);
             assert reviews != null;
             for (DocumentSnapshot review : reviews) {
                 new AddReviewToMapTask().execute(review);
@@ -45,20 +56,10 @@ public class ReviewMapActivity extends BaseActivity {
         };
 
         db.collection("reviews")
-                .whereEqualTo("restaurant", restaurant)
-                .get()
-                .addOnCompleteListener(onReviewsFetched);
+            .whereEqualTo("restaurant", restaurant)
+            .get()
+            .addOnCompleteListener(onReviewsFetched);
     }
-
-    // TODO MOVE IN UTILS
-    private List<DocumentSnapshot> getDocumentsFromTask(@NonNull Task<QuerySnapshot> task) {
-        if (task.isSuccessful()) {
-            return task.getResult().getDocuments();
-        } else {
-            Toast.makeText(ReviewMapActivity.this, "Error while fetching data, please try again", Toast.LENGTH_SHORT).show();
-        }
-        return null;
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class ReviewMapActivity extends BaseActivity {
         // Initialize osmdroid configuration
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        // Get reference to MapView from layout
+        // Setup mapView (osmdroid)
         mapView = findViewById(R.id.mapView);
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
@@ -82,13 +83,17 @@ public class ReviewMapActivity extends BaseActivity {
         db = FirebaseFirestore.getInstance();
 
         db.collection("restaurants")
-                .whereEqualTo("name", restaurant.getName())
-                .get()
-                .addOnCompleteListener(onRestaurantFetched);
+            .whereEqualTo("name", restaurant.getName())
+            .get()
+            .addOnCompleteListener(onRestaurantFetched);
     }
 
+    /**
+     * AsyncTask to add review markers with images to the map asynchronously.
+     */
     class AddReviewToMapTask extends AsyncTask<DocumentSnapshot, Void, Void> {
 
+        // Method to fetch image drawable from URL and add it to the map as a marker
         private void getImageDrawableAndAddToMap(String imageUrl, double latitude, double longitude) {
             try {
                 Drawable drawable = ImageUtils.drawableFromUrl(imageUrl);
@@ -98,12 +103,13 @@ public class ReviewMapActivity extends BaseActivity {
             }
         }
 
+        // Background task to process review documents and add markers to the map
         protected Void doInBackground(DocumentSnapshot... docs) {
             Double latitude = docs[0].getDouble("latitude");
             Double longitude = docs[0].getDouble("longitude");
             List<String> images = (List<String>) docs[0].get("images");
 
-            if(images == null) return null;
+            if (images == null) return null;
 
             images.forEach(imageUrl -> getImageDrawableAndAddToMap(imageUrl, latitude, longitude));
 

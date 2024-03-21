@@ -1,4 +1,4 @@
-package com.example.restaurants;
+package com.example.restaurants.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.restaurants.R;
+import com.example.restaurants.activities.RestaurantDetailActivity;
+import com.example.restaurants.models.Restaurant;
+import com.example.restaurants.utils.ImageUtils;
 
 import java.util.List;
 
@@ -33,15 +38,16 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
         final Restaurant restaurant = restaurantList.get(position);
-        ImageLoader.load(restaurant.getImages().get(0), holder.imageViewRestaurant);
+        ImageUtils.loadWithPlaceholder(restaurant.getImages().get(0), holder.imageViewRestaurant);
+
+        // Set restaurant infos
         holder.textViewName.setText(restaurant.getName());
         holder.textViewAddress.setText(restaurant.getAddress());
         holder.textViewRating.setText("Rating: " + restaurant.getRating());
         holder.textViewPrice.setText("Average Price: " + restaurant.getPrice());
 
-        // Set click listener
         holder.itemView.setOnClickListener(view -> {
-            // Launch activity or fragment to display restaurant details
+            // Launch activity to display restaurant details
             Intent intent = new Intent(context, RestaurantDetailActivity.class);
             intent.putExtra("restaurant", restaurant);
             context.startActivity(intent);

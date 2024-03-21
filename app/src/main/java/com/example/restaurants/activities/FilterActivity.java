@@ -1,4 +1,4 @@
-package com.example.restaurants;
+package com.example.restaurants.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,6 +15,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.restaurants.R;
+import com.example.restaurants.utils.ImageUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -27,6 +30,12 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
     private TextView accelerometer;
     private int intensity;
 
+    private void setInitialImage() {
+        Uri imageUri = getIntent().getParcelableExtra("imageUri");
+        capturedImage = loadBitmapFromFile(imageUri);
+        setImage(capturedImage);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,16 +45,10 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
 
         // Initialize views
         imageView = findViewById(R.id.imageView);
-
-        // Retrieve the image file URI from the intent
-        Uri imageUri = getIntent().getParcelableExtra("imageUri");
-
-        // Load the image from the file
-        capturedImage = loadBitmapFromFile(imageUri);
-
-        setImage(capturedImage);
-
         accelerometer = findViewById(R.id.accelerometer);
+
+        setInitialImage();
+
 
         findViewById(R.id.applyGrayscale).setOnClickListener(v -> {
             Bitmap filteredImage = applyGrayscaleFilter(capturedImage);
@@ -71,9 +74,8 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
     protected void onResume() {
         super.onResume();
         Sensor mAccelerometer =
-                sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sm.registerListener(this, mAccelerometer,
-                SensorManager.SENSOR_DELAY_NORMAL);
+            sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sm.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private Bitmap loadBitmapFromFile(Uri fileUri) {
@@ -88,6 +90,8 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
 
     @Override
     protected void onStop() {
+        sm.unregisterListener(this,
+            sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         super.onStop();
         // Delete the image file when the activity is destroyed
         Uri imageUri = getIntent().getParcelableExtra("imageUri");
@@ -99,11 +103,8 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
         }
     }
 
-    // Example method to apply grayscale filter to the image
+    // Convert image to grayscale
     private Bitmap applyGrayscaleFilter(Bitmap image) {
-        // Convert image to grayscale
-        // You can use ColorMatrixColorFilter or RenderScript for better performance
-        // For simplicity, let's use BitmapFactory to convert to grayscale
         Bitmap grayImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
         android.graphics.Canvas canvas = new android.graphics.Canvas(grayImage);
         android.graphics.Paint paint = new android.graphics.Paint();
@@ -115,10 +116,8 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
         return grayImage;
     }
 
-    // Example method to apply brightness filter to the image based on intensity
+    // Adjust image brightness based on intensity
     private Bitmap applyBrightnessFilter(Bitmap image, int intensity) {
-        // Adjust brightness based on intensity
-        // For demonstration, let's adjust the brightness linearly based on intensity
         float brightnessFactor = (float) intensity / 100;
         Bitmap filteredImage = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
         android.graphics.ColorMatrix colorMatrix = new android.graphics.ColorMatrix();
@@ -135,6 +134,7 @@ public class FilterActivity extends AppCompatActivity implements SensorEventList
     public void onSensorChanged(SensorEvent event) {
         int sensorType = event.sensor.getType();
         if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            System.out.println("HERE ON SENSOR CHANGED");
 
             // Calculate the magnitude of acceleration vector
             float x = Math.abs(event.values[0]);

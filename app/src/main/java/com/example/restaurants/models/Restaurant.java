@@ -1,4 +1,4 @@
-package com.example.restaurants;
+package com.example.restaurants.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;

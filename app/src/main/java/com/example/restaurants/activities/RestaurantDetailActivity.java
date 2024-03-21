@@ -1,4 +1,4 @@
-package com.example.restaurants;
+package com.example.restaurants.activities;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -19,25 +19,26 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.restaurants.R;
+import com.example.restaurants.models.Restaurant;
+import com.example.restaurants.utils.ImageUtils;
+
 import java.util.Calendar;
 
 public class RestaurantDetailActivity extends BaseActivity {
 
-    private TextView textViewReservationDate;
     private Restaurant restaurant;
     private ViewPager viewPager;
     private ImagePagerAdapter adapter;
+    private EditText reservationDateField;
+    private Button makeReservationBtn;
+    private EditText numberPeopleField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_detail);
         setupToolbar(true);
-
-        textViewReservationDate = findViewById(R.id.textViewReservationDate);
-
-        // Set OnClickListener for the reservation date TextView
-        textViewReservationDate.setOnClickListener(v -> showDatePickerDialog());
 
         // Get the selected restaurant from the intent
         Intent intent = getIntent();
@@ -50,6 +51,12 @@ public class RestaurantDetailActivity extends BaseActivity {
         TextView ratingTextView = findViewById(R.id.textViewRestaurantRating);
         TextView priceTextView = findViewById(R.id.textViewRestaurantPrice);
         TextView descriptionTextView = findViewById(R.id.textViewRestaurantDescription);
+        makeReservationBtn = findViewById(R.id.buttonMakeReservation);
+        reservationDateField = findViewById(R.id.textViewReservationDate);
+        numberPeopleField = findViewById(R.id.editTextNumberOfPeople);
+        viewPager = findViewById(R.id.viewPager);
+
+        makeReservationBtn.setEnabled(false); // set button disable initially
 
         // Set restaurant details to views
         assert restaurant != null;
@@ -59,75 +66,60 @@ public class RestaurantDetailActivity extends BaseActivity {
         priceTextView.setText("Average Price : " + restaurant.getPrice());
         descriptionTextView.setText(restaurant.getDescription());
 
-
-        viewPager = findViewById(R.id.viewPager);
-
         // Set up the ViewPager adapter
         adapter = new ImagePagerAdapter();
         viewPager.setAdapter(adapter);
 
+        setupListeners();
 
-        Button makeReservationBtn = findViewById(R.id.buttonMakeReservation);
-        EditText reservationDateField = findViewById(R.id.textViewReservationDate);
-        EditText numberPeopleField = findViewById(R.id.editTextNumberOfPeople);
+    }
 
-        makeReservationBtn.setEnabled(false); // set button disable initially
-
-        // Add TextChangedListener to editTextField1
-        reservationDateField.addTextChangedListener(new TextWatcher() {
+    // Method to add TextChangedListener to EditText fields
+    private void addTextChangedListener(EditText editText) {
+        editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Check if both EditText fields have values
-                // Disable the button
-                makeReservationBtn.setEnabled(!TextUtils.isEmpty(reservationDateField.getText()) && !TextUtils.isEmpty(numberPeopleField.getText())); // Enable the button
+                updateButtonState();
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
+    }
 
-// Add TextChangedListener to editTextField2
-        numberPeopleField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+    // Update button state based on EditText fields
+    private void updateButtonState() {
+        makeReservationBtn.setEnabled(!TextUtils.isEmpty(reservationDateField.getText()) &&
+            !TextUtils.isEmpty(numberPeopleField.getText()));
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Check if both EditText fields have values
-                // Disable the button
-                makeReservationBtn.setEnabled(!TextUtils.isEmpty(reservationDateField.getText()) && !TextUtils.isEmpty(numberPeopleField.getText())); // Enable the button
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-
-        findViewById(R.id.buttonAddReview).setOnClickListener(v -> {
-            Intent reviewIntent = new Intent(this, ReviewActivity.class);
-            reviewIntent.putExtra("restaurant", restaurant);
-            this.startActivity(reviewIntent);
-        });
-
-        findViewById(R.id.buttonSeeReview).setOnClickListener(v -> {
-            Intent reviewIntent = new Intent(this, ReviewMapActivity.class);
-            reviewIntent.putExtra("restaurant", restaurant);
-            this.startActivity(reviewIntent);
-        });
-
-        Button buttonMakeReservation = findViewById(R.id.buttonMakeReservation);
-        buttonMakeReservation.setOnClickListener(v -> {
+    private void setupListeners() {
+        addTextChangedListener(reservationDateField);
+        addTextChangedListener(numberPeopleField);
+        reservationDateField.setOnClickListener(v -> showDatePickerDialog());
+        findViewById(R.id.buttonAddReview).setOnClickListener(v -> startReviewActivity());
+        findViewById(R.id.buttonSeeReview).setOnClickListener(v -> startReviewMapActivity());
+        makeReservationBtn.setOnClickListener(v -> {
             Toast.makeText(this, "Reservation successful!", Toast.LENGTH_SHORT).show();
             finish();
         });
+    }
 
+    private void startReviewActivity() {
+        Intent reviewIntent = new Intent(this, ReviewActivity.class);
+        reviewIntent.putExtra("restaurant", restaurant);
+        this.startActivity(reviewIntent);
+    }
+
+    private void startReviewMapActivity() {
+        Intent reviewIntent = new Intent(this, ReviewMapActivity.class);
+        reviewIntent.putExtra("restaurant", restaurant);
+        this.startActivity(reviewIntent);
     }
 
     private void showDatePickerDialog() {
@@ -138,15 +130,13 @@ public class RestaurantDetailActivity extends BaseActivity {
         int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
         // Create DatePickerDialog and set listener
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, year1, monthOfYear, dayOfMonth1) -> {
-                    // Update reservation date TextView with selected date
-                    String selectedDate = dayOfMonth1 + "/" + (monthOfYear + 1) + "/" + year1;
-                    textViewReservationDate.setText(selectedDate);
-                }, year, month, dayOfMonth);
-
-        // Show DatePickerDialog
-        datePickerDialog.show();
+        new DatePickerDialog(this, (view, year1, monthOfYear, dayOfMonth1) -> {
+            // Update reservation date TextView with selected date
+            String month_ = String.valueOf(monthOfYear + 1);
+            if (monthOfYear + 1 < 10) month_ = "0" + (monthOfYear + 1);
+            String selectedDate = dayOfMonth1 + "/" + month_ + "/" + year1;
+            reservationDateField.setText(selectedDate);
+        }, year, month, dayOfMonth).show();
     }
 
     // Custom PagerAdapter for the ViewPager
@@ -167,12 +157,11 @@ public class RestaurantDetailActivity extends BaseActivity {
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             // Inflate the layout for each image
             View view = LayoutInflater.from(container.getContext())
-                    .inflate(R.layout.image_item, container, false);
+                .inflate(R.layout.image_item, container, false);
 
             ImageView imageView = view.findViewById(R.id.imageView);
 
-            ImageLoader.load(restaurant.getImages().get(position), imageView);
-
+            ImageUtils.loadWithPlaceholder(restaurant.getImages().get(position), imageView);
 
             container.addView(view);
             return view;

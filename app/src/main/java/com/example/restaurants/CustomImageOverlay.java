@@ -1,5 +1,9 @@
 package com.example.restaurants;
 
+import static com.example.restaurants.AppConfig.MARKER_COORDS_NOISE;
+import static com.example.restaurants.AppConfig.MARKER_IMAGE_HEIGHT;
+import static com.example.restaurants.AppConfig.MARKER_IMAGE_WIDTH;
+
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -18,7 +22,7 @@ public class CustomImageOverlay extends Overlay {
         super();
         this.imageDrawable = imageDrawable;
         // Add a small random offset to the latitude and longitude so we can see images on same coordinates
-        double offset = 0.00015;
+        double offset = MARKER_COORDS_NOISE;
         Random random = new Random();
         double randomLatOffset = offset * (random.nextDouble() - 0.5);
         double randomLonOffset = offset * (random.nextDouble() - 0.5);
@@ -35,8 +39,8 @@ public class CustomImageOverlay extends Overlay {
             Point point = mapView.getProjection().toPixels(geoPoint, null);
 
             // Calculate image bounds
-            int imageWidth = 200;
-            int imageHeight = 250;
+            int imageWidth = MARKER_IMAGE_WIDTH;
+            int imageHeight = MARKER_IMAGE_HEIGHT;
             int left = point.x - (imageWidth / 2);
             int top = point.y - imageHeight;
 
